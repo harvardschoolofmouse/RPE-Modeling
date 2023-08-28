@@ -5,7 +5,7 @@ Original code for models in "Internal timing-related dopaminergic dynamics are e
 >
 >   Self-timed movement models and original simulations:  Allison E. Hamilos (@harvardschoolofmouse)
 >
->   Temporal Difference learning under state uncertainty with feedback:  Value function learning code adapted from original code by John Mikhael
+>   Temporal Difference learning under state uncertainty with feedback:  Value function learning code adapted from original code by John Mikhael. Dr. Mikhael's original code is included in the RPE-Modeling folder. Original derivation <a href="https://www.cell.com/current-biology/pdf/S0960-9822(22)00036-7.pdf">Mikhael et al., 2022, Current Biology 32, 1077–1087</a>
 > 
 
 ## Dependencies
