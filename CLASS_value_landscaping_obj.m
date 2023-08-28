@@ -117,7 +117,7 @@ classdef CLASS_value_landscaping_obj < handle
             % intervals -- use to construct the subjective timespace (statespace)
             precue_time_ms = 400;                   % time before cue
             timing_interval_ms = T_time.*1000;      % timing intervals from cue to stop
-            post_stop_interval_ms = 600;            % time to look after stop cue
+            post_stop_interval_ms = 1600;            % time to look after stop cue
             total_post_cue_time = timing_interval_ms+post_stop_interval_ms;     % total states past the cue (non inclusive of 0)
             total_time = precue_time_ms+timing_interval_ms+post_stop_interval_ms;  % total time for each interval (not inclusive of 0)
             state_width_ms = 80;                    % each subjective timing state assumed to include this many ms of veridical time
@@ -258,7 +258,7 @@ classdef CLASS_value_landscaping_obj < handle
             if Plot
                 [f1,ax1] = makeStandardFigure(3,[3,1]);
                 title(ax1(1),'p(t|tau, \sigma_s) -- s means small width')
-                title(ax1(2),'p(t|tau, \sigma_l * \sigma_{weber})')
+                title(ax1(2),'p(t|tau, \sigma_l) -- s means large width') %* \sigma_{weber})')
                 title(ax1(3),'p(t|tau, \sigma_{weber})')
                 xlabel(ax1(3),'Veridical Time (s)')
                 plot(ax1(1),obj.b.params.t_subjective,obj.b.params.xs)
@@ -518,7 +518,7 @@ classdef CLASS_value_landscaping_obj < handle
             addParameter(pp, 'p_veridical', [0,1], @isnumeric);
             addParameter(pp, 'p_slow', [0.008,0.008], @isnumeric); %[0.0001,0.05], @isnumeric);
             addParameter(pp, 'p_fast', [0.0275,0.0275], @isnumeric);%[0.004,0.90], @isnumeric);
-            addParameter(pp, 'n_sim', 100, @isnumeric);%[0.004,0.90], @isnumeric);
+            addParameter(pp, 'n_sim', 1000, @isnumeric);%[0.004,0.90], @isnumeric);
             parse(pp, varargin{:});
             Plot            = pp.Results.Plot;
             p_veridical 	= pp.Results.p_veridical;
@@ -792,19 +792,19 @@ classdef CLASS_value_landscaping_obj < handle
             title(ax1(2), 'RPE')
             title(ax1(3), 'Smoothed RPE')
             
-            plot(ax1(1),t_subjective,V,'g-','linewidth', 4, 'displayname', 'True Value')
+            plot(ax1(1),t_subjective,V,'g-','linewidth', 4, 'displayname', 'V, True Value Function')
             plot(ax1(1),t_veridical_fast,Vh,'b-','linewidth', 3, 'displayname', 'Vh, fast pacemaker')
             plot(ax1(1),t_veridical_optimal,Vh,'k-','linewidth', 3, 'displayname', 'Vh, optimal timer')
             plot(ax1(1),t_veridical_slow,Vh,'r-','linewidth', 3, 'displayname', 'Vh, slow pacemaker')
             
             
-            plot(ax1(2),t_veridical_fast(1:end-2),delta(1:end-2),'b-','linewidth', 3, 'displayname', 'Vh, fast pacemaker') % truncated to avoid edge artifact
-            plot(ax1(2),t_veridical_optimal(1:end-2),delta(1:end-2),'k-','linewidth', 3, 'displayname', 'Vh, optimal timer')
-            plot(ax1(2),t_veridical_slow(1:end-2),delta(1:end-2),'r-','linewidth', 3, 'displayname', 'Vh, slow pacemaker')
+            plot(ax1(2),t_veridical_fast(1:numel(delta)),delta,'b-','linewidth', 3, 'displayname', 'Vh, fast pacemaker') % truncated to avoid edge artifact
+            plot(ax1(2),t_veridical_optimal(1:numel(delta)),delta,'k-','linewidth', 3, 'displayname', 'Vh, optimal timer')
+            plot(ax1(2),t_veridical_slow(1:numel(delta)),delta,'r-','linewidth', 3, 'displayname', 'Vh, slow pacemaker')
 
-            plot(ax1(3),t_veridical_fast(1:end-2),smoothdelta(1:end-2),'b-','linewidth', 3, 'displayname', 'Vh, fast pacemaker') % truncated to avoid edge artifact
-            plot(ax1(3),t_veridical_optimal(1:end-2),smoothdelta(1:end-2),'k-','linewidth', 3, 'displayname', 'Vh, optimal timer')
-            plot(ax1(3),t_veridical_slow(1:end-2),smoothdelta(1:end-2),'r-','linewidth', 3, 'displayname', 'Vh, slow pacemaker')
+            plot(ax1(3),t_veridical_fast(1:numel(delta)),smoothdelta,'b-','linewidth', 3, 'displayname', 'Vh, fast pacemaker') % truncated to avoid edge artifact
+            plot(ax1(3),t_veridical_optimal(1:numel(delta)),smoothdelta,'k-','linewidth', 3, 'displayname', 'Vh, optimal timer')
+            plot(ax1(3),t_veridical_slow(1:numel(delta)),smoothdelta,'r-','linewidth', 3, 'displayname', 'Vh, slow pacemaker')
             
             ylabel(ax1(1),'Value')
             ylim(ax1(1),[0 1])
@@ -817,7 +817,7 @@ classdef CLASS_value_landscaping_obj < handle
             xlim(ax1(3),[min(t_veridical_slow) max(t_veridical_slow)])
 
             
-            legend('show','location', 'best', 'box','off')
+            legend(ax1(1),'show','location', 'best', 'box','off')
         end
         
         
@@ -881,8 +881,10 @@ classdef CLASS_value_landscaping_obj < handle
             
             state_width_ms = 100;
 %             n = round((3000-1)/state_width_ms);
-            n = round((3000+400)/state_width_ms)+1;
-            t_subjective = linspace(-0.4,3,n);
+%             n = round((3000+400)/state_width_ms)+1;
+            n = round((4000)/state_width_ms)+1;
+%             t_subjective = linspace(-0.4,3,n);
+            t_subjective = linspace(-0.4,4,n);
             w = 0.15;
             web = w*(1:n);
             S = .1+zeros(1,n);
@@ -927,12 +929,14 @@ classdef CLASS_value_landscaping_obj < handle
                 % assign reward based on how likely to guess correctly at
                 % each for now
                 r = zeros(n,1); 
-                if ix==1, if obj.flip(0.98),r(T) = 1; else,r(T) = 0;end
-                elseif ix==2, if obj.flip(0.94), r(T) = 1; else, r(T) = 0;end
-                elseif ix==3, if obj.flip(0.82), r(T) = 1; else, r(T) = 0;end
-                elseif ix==4, if obj.flip(0.71), r(T) = 1; else, r(T) = 0;end
-                elseif ix==5, if obj.flip(0.85), r(T) = 1; else, r(T) = 0;end
-                elseif ix==6, if obj.flip(0.94), r(T) = 1; else, r(T) = 0;end
+                warning('messed with this to make reward up longer than just once')
+                forwardTime = 50;
+                if ix==1, if obj.flip(0.98),r(T:T+forwardTime) = 1; else,r(T) = 0;end
+                elseif ix==2, if obj.flip(0.94), r(T:T+forwardTime) = 1; else, r(T) = 0;end
+                elseif ix==3, if obj.flip(0.82), r(T:T+forwardTime) = 1; else, r(T) = 0;end
+                elseif ix==4, if obj.flip(0.71), r(T:T+forwardTime) = 1; else, r(T) = 0;end
+                elseif ix==5, if obj.flip(0.85), r(T:T+forwardTime) = 1; else, r(T) = 0;end
+                elseif ix==6, if obj.flip(0.94), r(T:T+forwardTime) = 1; else, r(T) = 0;end
                 end
                 n_trials(ix) = n_trials(ix)+1;
                 [Vh,delta,w,n_complete,n_rewards,rewarded] = obj.tryWeberUpdate(T, Vh, delta, w, trial,n_complete,n_rewards,pbail,xw,xs,r,gamma,alpha,ix,t_subjective,obj.p.nofeedback,obj.p.prob_correct_mode);
@@ -1011,21 +1015,27 @@ classdef CLASS_value_landscaping_obj < handle
             oT = find(t_subjective <= 0);
             n=numel(t_subjective);
             
+            webercoeff = 0.01;
+
             S = zeros(1,n);
-            S(max(oT)+1:end) = 0.15.*(1:numel(Vh)-max(oT)); %0.15.*(1:numel(Vh)); 
+            S(max(oT)+1:end) = webercoeff.*(1:numel(Vh)-max(oT)); %0.15.*(1:numel(Vh)); 
             S(t_subjective <= 0) = 0;
-            S(T+1) = 2*0.15;
-            S(T+2:end) = 0;
-%             S=S./sum(S);
             
+            % I got rid of this 8/28: I think it makes sense. Mouse still
+            % doesnt know what time it is relative to cue even though it
+            % gets tone 2...
+%             S(T+1) = 2*0.15;
+%             S(T+2:end) = 0;
+%             S=S./sum(S);
+%             
             L = S;
-            if ~nofeedback
-                S(T) = 0.15;
-                S(T+1) = 2*0.15;
-            else
-                S(T) = 0.15;
-                L = S;
-            end
+%             if ~nofeedback
+%                 S(T) = 0.15;
+%                 S(T+1) = 2*0.15;
+%             else
+%                 S(T) = 0.15;
+%                 L = S;
+%             end
             
             
             
@@ -1053,27 +1063,41 @@ classdef CLASS_value_landscaping_obj < handle
             % the learned value function because we are focused on times
             % before feedback in the value landscape
             p_correct = [0.98,0.94,0.82,0.71,0.85,0.94];
-            if r(T)==1
-%                 Vh(T+2:end) = 1;
-                if prob_correct_mode
-                    w(T+1:end) = 1;         	% value is 1 after reward
-                else
-                    w(T+1:end) = 1;         	% value is 1 after reward
+%             if r(T)==1
+% %                 warning('tried to messed with this, but doesnt help to comment out')
+%                 if prob_correct_mode
+%                     w(T:end) = 1;         	% value is 1 after reward
+%                 else
+%                     w(T:end) = 1;         	% value is 1 after reward
+%                 end
+%             else
+% 
+%                 w(T+1:end) = 0;         	% value is 0 after mistake
+% %                 warning('messed')
+% %                 w(T+1:end) = 1;         	% value is 1 -- still thinks it has a shot!
+% 
+%             end
+            if ~thistrialbailed
+                if prob_correct_mode && r(T)==1
+    %                 r(T) = p_correct(ix); 
+%                     warning('messed')
+    %                 r(r==1) = p_correct(ix); 
+                    r(T:T+2) = p_correct(ix); 
+                    r(T+3:end) = 1; 
+                    rewarded(1)=1;
+                    n_rewards(ix) = n_rewards(ix)+1;
+                elseif prob_correct_mode && r(T)==0
+%                     warning('messed *********')
+                    r(T:T+2) = p_correct(ix); 
+                    r(T+3:end) = 0; 
+                    rewarded(1)=0;
                 end
-%                 disp('rewarded')
-            else
-%                 Vh(T+2:end) = 0;
-                w(T+1:end) = 0;         	% value is 0 after mistake
-%                 disp('NOT rewarded')
-            end
-            if prob_correct_mode && r(T)==1
-                r(T) = p_correct(ix); 
             end
             
             
             
             
-            for t = 1:T+1% T+1
+            for t = 1:T+8% T+1 *********')
                 if ~bailnegativeRPE && obj.flip(pbail) && t < T
                     Vh=Vh_init;
                     w=w_init;
@@ -1084,11 +1108,13 @@ classdef CLASS_value_landscaping_obj < handle
                     if thistrialbailed
                     else
                         n_complete(ix) = n_complete(ix)+1;
-                        if r(T)>0
-                            n_rewards(ix) = n_rewards(ix)+1;
-                            rewarded(1)=1;
-                        else
-                            rewarded(1)=0;
+                        if ~prob_correct_mode
+                            if r(T)>0
+                                n_rewards(ix) = n_rewards(ix)+1;
+                                rewarded(1)=1;
+                            else
+                                rewarded(1)=0;
+                            end
                         end
                     end
                 end
@@ -1106,8 +1132,11 @@ classdef CLASS_value_landscaping_obj < handle
 
 %             Vh(T+1:end) = Vh_init(T+1:end);
 %             w(T+1:end) = w_init(T+1:end);
-            Vh(T:end) = Vh_init(T:end);
-            w(T:end) = w_init(T:end);
+% UNLESS IT'S ix==6!!
+            if ix ~= 6
+                Vh(T:end) = Vh_init(T:end);
+                w(T:end) = w_init(T:end);
+            end
             
         end
         function test_RPE(obj,ix)
@@ -1297,7 +1326,17 @@ classdef CLASS_value_landscaping_obj < handle
             % We will take the learned value landscape and simulate trials
             % of a mouse...
             %
-            ntrials = obj.p.weber.ntrials;w = obj.p.weber.w;Vh = obj.p.weber.Vh;n = numel(Vh);delta = obj.p.weber.delta;n_complete = obj.p.weber.n_complete;n_rewards = obj.p.weber.n_rewards;t_subjective = obj.p.weber.t_subjective;alpha = obj.params.alpha;gamma = obj.params.gamma;Ts = obj.p.weber.Ts;
+            ntrials = obj.p.weber.ntrials;
+            w = obj.p.weber.w;
+            Vh = obj.p.weber.Vh;
+            n = numel(Vh);
+            delta = obj.p.weber.delta;
+            n_complete = obj.p.weber.n_complete;
+            n_rewards = obj.p.weber.n_rewards;
+            t_subjective = obj.p.weber.t_subjective;
+            alpha = obj.params.alpha;
+            gamma = obj.params.gamma;
+            Ts = obj.p.weber.Ts;
             pbail = obj.p.weber.pbail;
             
             [f1,ax1] = makeStandardFigure(3,[3,1]);
@@ -1395,7 +1434,7 @@ classdef CLASS_value_landscaping_obj < handle
         end
         function [f,ax]=plotperceptionsim(obj,f,ax,Value_correct,RPE_correct,Value_incorrect,RPE_incorrect,Value_bail,RPE_bail,t_subjective, n_correct, n_incorrect, n_bail)
             if isempty(f)
-                [f,ax]=makeStandardFigure(6,[2,3]);
+                [f,ax]=makeStandardFigure(7,[3,3]);
             end
             title(ax(1),'Correct')
             title(ax(2),'Incorrect')
@@ -1415,6 +1454,26 @@ classdef CLASS_value_landscaping_obj < handle
             xlim(ax(4),get(ax(1),'xlim'))
             xlim(ax(5),get(ax(2),'xlim'))
             xlim(ax(6),get(ax(3),'xlim'))
+            for ii = 1:6
+                xlim(ax(ii), [-0.5,2.5])
+            end
+            
+            % pick off the thing for our plot
+            jitter = (rand(6,1)*2 - 1)/2;
+            plot(ax(7),-1+jitter(1),RPE_correct(1,obj.p.weber.Ts(1)-1), 'ro')
+            plot(ax(7),-1+jitter(2),RPE_correct(2,obj.p.weber.Ts(2)-1), 'ro')
+            plot(ax(7),-1+jitter(3),RPE_correct(3,obj.p.weber.Ts(3)-1), 'ro')
+            plot(ax(7),-1+jitter(4),RPE_correct(4,obj.p.weber.Ts(4)-1), 'bo')
+            plot(ax(7),-1+jitter(5),RPE_correct(5,obj.p.weber.Ts(5)-1), 'bo')
+            plot(ax(7),-1+jitter(6),RPE_correct(6,obj.p.weber.Ts(6)-1), 'bo')
+
+            plot(ax(7),1+jitter(1),RPE_correct(1,obj.p.weber.Ts(1)+2), 'ro')
+            plot(ax(7),1+jitter(2),RPE_correct(2,obj.p.weber.Ts(2)+2), 'ro')
+            plot(ax(7),1+jitter(3),RPE_correct(3,obj.p.weber.Ts(3)+2), 'ro')
+            plot(ax(7),1+jitter(4),RPE_correct(4,obj.p.weber.Ts(4)+2), 'bo')
+            plot(ax(7),1+jitter(5),RPE_correct(5,obj.p.weber.Ts(5)+2), 'bo')
+            plot(ax(7),1+jitter(6),RPE_correct(6,obj.p.weber.Ts(6)+2), 'bo')
+
         end
     end
 end
