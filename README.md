@@ -17,22 +17,23 @@ Runs on MATLAB 2023a+
 Running obj = CLASS_value_landscaping_obj will produce Figures 2 and 3 from the biorxiv manuscript. That's all you need to do! The uncertainty kernels will also display. 
 
 ### Simulated internal timing states and value/RPE landscapes
-<img width="30%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/5477780d-c597-4191-aa1a-65142770361b">
-
+<img width="30%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/5477780d-c597-4191-aa1a-65142770361b"> 
+<br>
 <img width="40%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/8a073b6f-8b93-4497-94b4-1958e890013f">
-
+<br>
 <img width="40%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/9c02d581-09f3-45b2-8641-4f30eeda956f">
 
 
 ### Value function learning (the state uncertainty + feedback model is shown in the paper)
+<img width="25%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/66dbc37a-6b0d-4684-9c39-1aa51d9c5b63">
 
-<img width="526" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/4f8c63f5-c78f-4063-8eca-5520f8a851ee">
+<img width="25%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/9247e6cf-66ae-4bd5-b936-90a1e1c4a99a">
 
-<img width="526" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/d20dc79a-a6d5-4d14-ab7c-8aa117e5d1b0">
+<img width="25%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/dd7660a0-328d-4316-ab6f-0234de591ae1">
 
-<img width="526" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/78b1aaf9-ca7b-4563-bd44-1918ae6e9f40">
 
-<img width="526" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/f975fd7e-867a-48e9-b63a-5a797af163cf">
+<img width="25%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/45a28bf7-9b8d-483b-9b42-4a0a7c211b86">
+
 
 
 
