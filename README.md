@@ -17,11 +17,11 @@ Runs on MATLAB 2023a+
 Running obj = CLASS_value_landscaping_obj will produce Figures 2 and 3 from the biorxiv manuscript. That's all you need to do! The uncertainty kernels will also display. 
 
 ### Simulated internal timing states and value/RPE landscapes
-<img width="50%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/5477780d-c597-4191-aa1a-65142770361b">
+<img width="30%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/5477780d-c597-4191-aa1a-65142770361b">
 
-<img width="768" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/8a073b6f-8b93-4497-94b4-1958e890013f">
+<img width="40%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/8a073b6f-8b93-4497-94b4-1958e890013f">
 
-<img width="768" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/9c02d581-09f3-45b2-8641-4f30eeda956f">
+<img width="40%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/9c02d581-09f3-45b2-8641-4f30eeda956f">
 
 
 ### Value function learning (the state uncertainty + feedback model is shown in the paper)
