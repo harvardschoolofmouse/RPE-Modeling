@@ -1,9 +1,9 @@
 classdef CLASS_value_landscaping_obj < handle
 	% 
 	% 	Created 	12/25/21	ahamilos
-	% 	Modified 	12/25/21	ahamilos
+	% 	Modified 	08/27/23	ahamilos
 	% 
-	% 	Based on simulations by John Mikhael, 2019
+	% 	Based on simulations originally built and reported by John Mikhael et al, 2019
 	% 
 	properties
 		params
@@ -26,15 +26,16 @@ classdef CLASS_value_landscaping_obj < handle
             % intervals -- use to construct the subjective timespace (statespace)
             LOI_time_ms = 400;                      % lamp-off interval
             timing_interval_ms = T_time*1000;       % timing interval from cue to lick (not inclusive of 0)
-            post_lick_interval_ms = 300;            % time to look post-lick
+            post_lick_interval_ms = 1100;%300;            % time to look post-lick
+            warning('change here')
             total_post_cue_time = timing_interval_ms+post_lick_interval_ms;     % total states past the cue (non inclusive of 0)
             total_time = LOI_time_ms+timing_interval_ms+post_lick_interval_ms;  % total time (not inclusive of 0)
             state_width_ms = 80;                    % each subjective timing state assumed to include this many ms of veridical time
 
             % everything will be referenced to the subjective state space, e.g.,
             %   [-0.4s:0.1s:3.3s+post-lick time]
-            t_subjective = linspace(-(LOI_time_ms)/state_width_ms,...
-                                    total_post_cue_time/state_width_ms,...
+            t_subjective = linspace(-(LOI_time_ms)/state_width_ms,... % this is pre-cue time
+                                    total_post_cue_time/state_width_ms,... % this is total time post-cue
                                     total_time/state_width_ms+1)...
                                     ./1000*state_width_ms;
 
@@ -87,9 +88,13 @@ classdef CLASS_value_landscaping_obj < handle
             end
             % true value landscape         
             obj.b.params.t = 1:obj.b.params.n;      % time (ie subjective timing state), originally t by JM
-            obj.b.params.r = zeros(obj.b.params.n,1); obj.b.params.r(obj.b.params.T) = 1;               % reward schedule (i.e., position of lick)
-            obj.b.params.oT = [1:obj.b.params.CS, obj.b.params.T+1:obj.b.params.n];                     % state positions outside the trial (cue and before, post-lick)
-            obj.b.params.V = obj.params.gamma.^(obj.b.params.T-obj.b.params.t)'; obj.b.params.V(obj.b.params.oT) = 0;           % assetion: true value landscape via exponential TD model
+            warning('changed this. mouse doesnt know outcome till after lick')
+            obj.b.params.r = zeros(obj.b.params.n,1); obj.b.params.r(obj.b.params.T+1) = 1;   % reward schedule (i.e., position of lick)
+            obj.b.params.oT = [1:obj.b.params.CS, obj.b.params.T+1:obj.b.params.n];   % state positions outside the trial (cue and before, post-lick)
+            obj.b.params.V = obj.params.gamma.^(obj.b.params.T-obj.b.params.t)'; 
+%             obj.b.params.V(obj.b.params.oT) = 0;           % assetion: true value landscape via exponential TD model
+            warning('changed this. trying to fix discontinuity')
+            obj.b.params.V(1:obj.b.params.CS) = 0; % assertion -- value after the lick is not defined, so continues to increase
             if Plot
                 [f1,ax1] = makeStandardFigure(1,[1,1]);
                 plot(ax1(1),obj.b.params.t_subjective,obj.b.params.V)
@@ -190,9 +195,11 @@ classdef CLASS_value_landscaping_obj < handle
             %   it must make a decision
             %
             % behavioral mode
-            obj.b.params.S = s+zeros(1,obj.b.params.n);                                  % SD of small uncertainty kernel -- this is in PRESENCE of feedback
-            obj.b.params.L = l+zeros(1,obj.b.params.n); obj.b.params.L(obj.b.params.T-1:end)=.1;% we will assume animal knows it is licking just before the reward state
-            obj.b.params.web = w*(obj.b.params.t-obj.b.params.CS); obj.b.params.web(1:obj.b.params.CS)=0;        % we assert there is no weber uncertainty before the cue, or rather uncertainty is max here
+            obj.b.params.S = s+zeros(1,obj.b.params.n);    % SD of small uncertainty kernel -- this is in PRESENCE of feedback
+            obj.b.params.L = l+zeros(1,obj.b.params.n); 
+%             obj.b.params.L(obj.b.params.T-1:end)=.1;% we will assume animal knows it is licking just before the reward state
+            obj.b.params.web = w*(obj.b.params.t-obj.b.params.CS); 
+            obj.b.params.web(1:obj.b.params.CS)=0;        % we assert there is no weber uncertainty before the cue, or rather uncertainty is max here
             % perceptual mode
             %
             if Plot
@@ -232,9 +239,21 @@ classdef CLASS_value_landscaping_obj < handle
 %             warning('I think we need to define L with the web somehow...the L depends on web...')
 %             obj.b.params.xl = obj.b.params.xl.*obj.b.params.xw; % we will multiplex the weber frax with the large kernel
 %             obj.b.params.xs = obj.b.params.xs;
-            obj.b.params.xs(:,obj.b.params.oT)=0; obj.b.params.xl(:,obj.b.params.oT)=0; obj.b.params.xw(:,obj.b.params.oT)=0;     % leave out times outside trial
-            obj.b.params.xs=obj.b.params.xs./sum(obj.b.params.xs); obj.b.params.xl=obj.b.params.xl./sum(obj.b.params.xl); obj.b.params.xw=obj.b.params.xw./sum(obj.b.params.xw);    % make prob dist's
-            obj.b.params.xs(isnan(obj.b.params.xs))=0; obj.b.params.xl(isnan(obj.b.params.xl))=0; obj.b.params.xw(isnan(obj.b.params.xw))=0; % nan's to zeros
+            warning('changed this so we keep kernels going forward forever from the cue')
+%             obj.b.params.xs(:,obj.b.params.oT)=0; 
+%             obj.b.params.xl(:,obj.b.params.oT)=0; 
+%             obj.b.params.xw(:,obj.b.params.oT)=0;     % leave out times outside trial
+            obj.b.params.xs(:,1:obj.b.params.CS)=0; 
+            obj.b.params.xl(:,1:obj.b.params.CS)=0; 
+            obj.b.params.xw(:,1:obj.b.params.CS)=0;     % leave out before the cue
+
+            obj.b.params.xs=obj.b.params.xs./sum(obj.b.params.xs); 
+            obj.b.params.xl=obj.b.params.xl./sum(obj.b.params.xl); 
+            obj.b.params.xw=obj.b.params.xw./sum(obj.b.params.xw);    % make prob dist's
+
+            obj.b.params.xs(isnan(obj.b.params.xs))=0; 
+            obj.b.params.xl(isnan(obj.b.params.xl))=0; 
+            obj.b.params.xw(isnan(obj.b.params.xw))=0; % nan's to zeros
 
             if Plot
                 [f1,ax1] = makeStandardFigure(3,[3,1]);
@@ -322,16 +341,21 @@ classdef CLASS_value_landscaping_obj < handle
                 title(ax1(1),['$\hat{V_t}$, beta=', num2str(beta(1,1))], 'interpreter', 'latex')
                 set(f1, 'name', 'State uncertainty without feedback, beta=0')
                 %beta=0, no feedback
+                warning('changed this search: ********************')
                 for iter = 1:numIter % for each iteration of learning...
-                    for y = 1:T+1
+                    for y = 1:T+5%T+1 ********************
                         Vh(y,1) = w(:,1)'*xs(:,y); % Vh=Vt, w=Vtau, xs=p(t|tau, sigma=s) -- assuming we got feedback
                         Vh(y+1,1) = w(:,1)'*xl(:,y+1); % Vh=Vt+1, w=Vtau+1, xs=p(t+1|tau+1, sigma=l)
                         delta(y,1) = r(y) + gamma*Vh(y+1,1) - Vh(y,1);
                         w(:,1) = w(:,1) + (alpha*delta(y,1)-beta(y,1)*w(:,1)).*xs(:,y); 
-                        w(T+1:end,1) = 1;          % value stays high until reward
+%                         w(T+1:end,1) = 1;          % value stays high
+%                         until reward ********************
                     end
-                    if Plot && ismember(iter,(numIter/10).*[1:10])
-                        plot(ax1(1),t_subjective,Vh(:,1), 'linewidth', 3, 'displayname', ['iter=', num2str(iter)])
+                    if Plot && ismember(iter,(numIter/10).*(1:10))
+                        Vhplot = Vh(:,1)./max(Vh(1:T,1)); % ********************
+                        plot(ax1(1),t_subjective,Vhplot, 'linewidth', 3, 'displayname', ['iter=', num2str(iter)])
+%                         plot(ax1(1),t_subjective,Vh(:,1), 'linewidth', 3,
+%                         'displayname', ['iter=', num2str(iter)]) ********************
                         plot(ax1(2),t_subjective,delta(:,1), 'linewidth', 3, 'displayname', ['iter=', num2str(iter)])
                     end
                     obj.b.unof.numIter = numIter;
@@ -342,16 +366,21 @@ classdef CLASS_value_landscaping_obj < handle
             elseif strcmp(Mode, 'weber') || Mode==3
                 set(f1, 'name', 'Weber uncertainty without feedback')
                 title(ax1(1),'$\hat{V_t}$, no feedback (weber uncertainty)', 'interpreter', 'latex')
+                warning('changed this search: ********************')
                 for iter = 1:numIter
-                    for y = 1:T+1
+                    for y = 1:T+5%T+1 ********************
                         Vh(y,3) = w(:,3)'*xw(:,y);
                         Vh(y+1,3) = w(:,3)'*xw(:,y+1); % actually is more uncertain in the next state
                         delta(y,3) = r(y) + gamma*Vh(y+1,3) - Vh(y,3);
                         w(:,3) = w(:,3) + alpha*delta(y,3).*xw(:,y);
-                        w(T+1:end,3) = r(T);         	% value stays high until reward
+%                         w(T+1:end,3) = r(T);         	% value stays high
+%                         until reward ********************
                     end
-                    if ismember(iter,(numIter/10).*[1:10])
-                        plot(ax1(1),t_subjective,Vh(:,3), 'linewidth', 3, 'displayname', ['iter=', num2str(iter)])
+                    if ismember(iter,(numIter/10).*(1:10))
+                        Vhplot = Vh(:,3)./max(Vh(1:T,3)); % ********************
+                        plot(ax1(1),t_subjective,Vhplot, 'linewidth', 3, 'displayname', ['iter=', num2str(iter)])
+%                         plot(ax1(1),t_subjective,Vh(:,3), 'linewidth', 3,
+%                         'displayname', ['iter=', num2str(iter)]) ********************
                         plot(ax1(2),t_subjective,delta(:,3), 'linewidth', 3, 'displayname', ['iter=', num2str(iter)])
                     end
                 end
@@ -363,16 +392,21 @@ classdef CLASS_value_landscaping_obj < handle
                 % beta=beta, with feedback
                 title(ax1(1),['$\hat{V_t}$, beta=', num2str(beta(1,2))], 'interpreter', 'latex')
                 set(f1, 'name', ['State uncertainty with feedback, beta=', num2str(beta(1,2))])
+                warning('changed this search: ********************')
                 for iter = 1:numIter % for each iteration of learning...
-                    for y = 1:T+1
+                    for y = 1:T+5%T+1 ********************
                         Vh(y,2) = w(:,2)'*xs(:,y);
                         Vh(y+1,2) = w(:,2)'*xl(:,y+1);
                         delta(y,2) = r(y) + gamma*Vh(y+1,2) - Vh(y,2);
                         w(:,2) = w(:,2) + (alpha*delta(y,2)-beta(y,2)*w(:,2)).*xs(:,y);
-                        w(T+1:end,2) = 1;          % value stays high until reward
+%                         w(T+1:end,2) = 1;          % value stays high
+%                         until reward ********************
                     end
-                    if ismember(iter,(numIter/10).*[1:10])
-                        plot(ax1(1),t_subjective,Vh(:,2), 'linewidth', 3, 'displayname', ['iter=', num2str(iter)])
+                    if ismember(iter,(numIter/10).*(1:10))
+                        Vhplot = Vh(:,2)./max(Vh(1:T,2)); % ********************
+                        plot(ax1(1),t_subjective,Vhplot, 'linewidth', 3, 'displayname', ['iter=', num2str(iter)])
+%                         plot(ax1(1),t_subjective,Vh(:,2), 'linewidth', 3,
+%                         'displayname', ['iter=', num2str(iter)]) ********************
                         plot(ax1(2),t_subjective,delta(:,2), 'linewidth', 3, 'displayname', ['iter=', num2str(iter)])
                     end
                 end
@@ -433,22 +467,25 @@ classdef CLASS_value_landscaping_obj < handle
             pp = inputParser;
             addParameter(pp, 'Plot', true, @islogical);
             addParameter(pp, 'p_veridical', [0,1], @isnumeric);
-            addParameter(pp, 'p_slow', [0.0001,0.05], @isnumeric);
-            addParameter(pp, 'p_fast', [0.004,0.90], @isnumeric);
+            addParameter(pp, 'p_slow', [0.008,0.008], @isnumeric); %[0.0001,0.05], @isnumeric);
+            addParameter(pp, 'p_fast', [0.0275,0.0275], @isnumeric);%[0.004,0.90], @isnumeric);
+            addParameter(pp, 'n_sim', 100, @isnumeric);%[0.004,0.90], @isnumeric);
             parse(pp, varargin{:});
             Plot            = pp.Results.Plot;
             p_veridical 	= pp.Results.p_veridical;
             p_slow 			= pp.Results.p_slow;
             p_fast          = pp.Results.p_fast;
+            n_sim           = pp.Results.n_sim;
             
             % simulate veridical timing behavior... state transitions
             % happen every obj.b.params.state_width_ms
             n = obj.b.params.n;
+            obj.b.params.n_sim = n_sim;
             
             % simulate many times to get a CI
-            tvos = nan(100,n);
-            tvss = nan(100,n);
-            tvfs = nan(100,n);
+            tvos = nan(n_sim,n);
+            tvss = nan(n_sim,n);
+            tvfs = nan(n_sim,n);
             for i = 1:1000
                  tvos(i,:) = obj.runBehaviorSim(p_veridical);
                  tvss(i,:) = obj.runBehaviorSim(p_slow);
@@ -496,16 +533,35 @@ classdef CLASS_value_landscaping_obj < handle
             CI_u_tvss = obj.b.sim.CI_u_tvss;
             CI_l_tvfs = obj.b.sim.CI_l_tvfs;
             CI_u_tvfs = obj.b.sim.CI_u_tvfs;  
+
+
+            T = obj.b.params.T;
+            beta = obj.b.params.beta;
+            V = obj.b.params.V; V = V(1:T);
+            Vh = obj.b.uwithf.Vh; Vh = Vh(1:T,2);
+            delta = obj.b.uwithf.delta; delta = delta(1:T,2);
+            Fs = 100;
+            [b,a] = butter(2, 10 / (Fs/2));
+            smoothdelta = filter(b,a,delta); 
+            delta=delta(1:end-2);% trim off the edge artifact -- times after first-lick not defined
+            smoothdelta = smoothdelta(1:end-2);
+
             
             t_subjective = obj.b.params.t_subjective;
             T = obj.b.params.T;
             
             
-            [f1,ax1] = makeStandardFigure(1,[1,1]);
+            [f1,ax1] = makeStandardFigure();
+            [f2,ax2] = makeStandardFigure(3,[1,3]);
             title(ax1(1),'simulated subjective state space')
             ylabel(ax1(1),'Subjective Time')
             xlabel(ax1(1),'Veridical Time')
             
+
+            set(f1, 'name', ['State Uncertainty at different subjective pacemaker rates, beta=', num2str(beta(1,2)), ' nsim=' num2str(obj.b.params.n_sim)]);
+            set(f2, 'units', 'normalized', 'position', [0.1,0.2,0.6,0.25]);
+            set(f2, 'name', ['State Uncertainty + Feedback Models at different subjective pacemaker rates, beta=', num2str(beta(1,2)), ' nsim=' num2str(obj.b.params.n_sim)]);
+
             set(f1, 'userdata', ['obj.simulateBehavior() CLASS_value_landscaping_obj runID=', num2str(obj.params.runID)])
             plot(ax1(1), [min(t_veridical_slow), max(t_veridical_slow)],[0,0],  'c--', 'linewidth', 2, 'displayname', 'cue')
             plot(ax1(1), [0,0],[min(t_subjective), max(t_subjective)],  'c--', 'linewidth', 2, 'displayname', 'cue', 'HandleVisibility', 'off')
@@ -527,6 +583,62 @@ classdef CLASS_value_landscaping_obj < handle
             plot(ax1(1), t_veridical_slow,t_subjective,  'r-', 'linewidth', 3, 'displayname', ['slow p[!stay, txn]=', mat2str(p_slow)])
             
             legend(ax1(1),'show','Location','best')
+
+
+
+            set(f2, 'userdata', ['obj.simulateBehavior() CLASS_value_landscaping_obj runID=', num2str(obj.params.runID)])
+
+         
+            plot(ax2(1), [0,0],[0, max(Vh)],  'c--', 'linewidth', 2, 'displayname', 'cue')
+            plot(ax2(1), [min(t_veridical_slow), max(CI_u_tvss)],[1,1],  'g--', 'linewidth', 2, 'displayname', 'threshold')
+            plot(ax2(1), CI_l_tvfs(1:numel(Vh)),Vh,  'b-', 'linewidth', 1, 'HandleVisibility', 'off')          
+            plot(ax2(1), CI_u_tvfs(1:numel(Vh)),Vh,  'b-', 'linewidth', 1, 'HandleVisibility', 'off')
+            plot(ax2(1), t_veridical_fast(1:numel(Vh)),Vh,  'b-', 'linewidth', 3, 'displayname', ['fast p[!stay, txn]=', mat2str(p_fast)])          
+            plot(ax2(1), CI_l_tvos(1:numel(Vh)),Vh,  'k-', 'linewidth', 1, 'HandleVisibility', 'off')          
+            plot(ax2(1), CI_u_tvos(1:numel(Vh)),Vh,  'k-', 'linewidth', 1, 'HandleVisibility', 'off')
+            plot(ax2(1), t_veridical_optimal(1:numel(Vh)),Vh,  'k-', 'linewidth', 3, 'displayname', ['optimal p[!stay, txn]=', mat2str(p_veridical)])
+            plot(ax2(1), CI_l_tvss(1:numel(Vh)),Vh,  'r-', 'linewidth', 1, 'HandleVisibility', 'off')          
+            plot(ax2(1), CI_u_tvss(1:numel(Vh)),Vh,  'r-', 'linewidth', 1, 'HandleVisibility', 'off')
+            plot(ax2(1), t_veridical_slow(1:numel(Vh)),Vh,  'r-', 'linewidth', 3, 'displayname', ['slow p[!stay, txn]=', mat2str(p_slow)])
+            legend(ax2(1),'show','Location','best')
+            
+            plot(ax2(2), [0,0],[0, max(CI_u_tvss)],  'c--', 'linewidth', 2, 'displayname', 'cue')
+            plot(ax2(2), [min(CI_u_tvss),max(CI_u_tvss)],[max(delta),max(delta)],  'g--', 'linewidth', 2, 'displayname', 'threshold')
+            plot(ax2(2), CI_l_tvfs(1:numel(delta)),delta,  'b-', 'linewidth', 1, 'HandleVisibility', 'off')          
+            plot(ax2(2), CI_u_tvfs(1:numel(delta)),delta,  'b-', 'linewidth', 1, 'HandleVisibility', 'off')
+            plot(ax2(2), t_veridical_fast(1:numel(delta)),delta,  'b-', 'linewidth', 3, 'displayname', ['fast p[!stay, txn]=', mat2str(p_fast)])          
+            plot(ax2(2), CI_l_tvos(1:numel(delta)),delta,  'k-', 'linewidth', 1, 'HandleVisibility', 'off')          
+            plot(ax2(2), CI_u_tvos(1:numel(delta)),delta,  'k-', 'linewidth', 1, 'HandleVisibility', 'off')
+            plot(ax2(2), t_veridical_optimal(1:numel(delta)),delta,  'k-', 'linewidth', 3, 'displayname', ['optimal p[!stay, txn]=', mat2str(p_veridical)])
+            plot(ax2(2), CI_l_tvss(1:numel(delta)),delta,  'r-', 'linewidth', 1, 'HandleVisibility', 'off')          
+            plot(ax2(2), CI_u_tvss(1:numel(delta)),delta,  'r-', 'linewidth', 1, 'HandleVisibility', 'off')
+            plot(ax2(2), t_veridical_slow(1:numel(delta)),delta,  'r-', 'linewidth', 3, 'displayname', ['slow p[!stay, txn]=', mat2str(p_slow)])
+            ylim(ax2(2),[0,max(delta)])
+
+
+            plot(ax2(3), [0,0], [0, max(CI_u_tvss)],  'c--', 'linewidth', 2, 'displayname', 'cue')
+            plot(ax2(3), [0, max(CI_u_tvss)],[max(smoothdelta),max(smoothdelta)],  'g--', 'linewidth', 2, 'displayname', 'threshold')
+            plot(ax2(3), CI_l_tvfs(1:numel(smoothdelta)),smoothdelta,  'b-', 'linewidth', 1, 'HandleVisibility', 'off')          
+            plot(ax2(3), CI_u_tvfs(1:numel(smoothdelta)),smoothdelta,  'b-', 'linewidth', 1, 'HandleVisibility', 'off')
+            plot(ax2(3), t_veridical_fast(1:numel(smoothdelta)),smoothdelta,  'b-', 'linewidth', 3, 'displayname', ['fast p[!stay, txn]=', mat2str(p_fast)])          
+            plot(ax2(3), CI_l_tvos(1:numel(smoothdelta)),smoothdelta,  'k-', 'linewidth', 1, 'HandleVisibility', 'off')          
+            plot(ax2(3), CI_u_tvos(1:numel(smoothdelta)),smoothdelta,  'k-', 'linewidth', 1, 'HandleVisibility', 'off')
+            plot(ax2(3), t_veridical_optimal(1:numel(smoothdelta)),smoothdelta,  'k-', 'linewidth', 3, 'displayname', ['optimal p[!stay, txn]=', mat2str(p_veridical)])
+            plot(ax2(3), CI_l_tvss(1:numel(smoothdelta)),smoothdelta,  'r-', 'linewidth', 1, 'HandleVisibility', 'off')          
+            plot(ax2(3), CI_u_tvss(1:numel(smoothdelta)),smoothdelta,  'r-', 'linewidth', 1, 'HandleVisibility', 'off')
+            plot(ax2(3), t_veridical_slow(1:numel(smoothdelta)),smoothdelta,  'r-', 'linewidth', 3, 'displayname', ['slow p[!stay, txn]=', mat2str(p_slow)])
+            ylim(ax2(3),[0,max(smoothdelta)])
+                        
+            ylabel(ax2(1),'Subjective Value, V_τ = V_t ')
+            ylabel(ax2(2),'dV_τ / dτ  ≈ RPE, δ_τ')
+            ylabel(ax2(3),'Smooth RPE, δ_τ')
+
+            for ii = 1:3
+                xlim(ax2(ii), [-0.5,5.5])
+                xticks(ax2(ii), -0.5:0.5:7.5)
+                xlabel(ax2(ii), 'Veridical Time, t')
+            end
+            
         end
         function t_veridical = runBehaviorSim(obj, p)
             % p = [1-p_stay (should be the case for times <
@@ -544,7 +656,7 @@ classdef CLASS_value_landscaping_obj < handle
             t_breaks = obj.b.params.state_width_ms;
             t_since_break = 0;
             
-            for t = 0:1000*T_time+1000
+            for t = 0:1000*T_time+2000%1000
                 t_ms = t_ms+1;
                 t_since_break = t_since_break+1;
                 if numel(t_veridical) == numel(t_subjective)
@@ -582,6 +694,10 @@ classdef CLASS_value_landscaping_obj < handle
             end
         end
         function simBehaviorValueTrajectory(obj)
+            %
+            %   NB: plotsimulation is preferred, as it shows CIs
+            %
+
             % must call obj.simulateBehavior first. also must have learned
             % value trajectory already learning(obj, Mode, Plot, numIter) in Mode 2
             T = obj.b.params.T;
@@ -595,12 +711,19 @@ classdef CLASS_value_landscaping_obj < handle
             t_veridical_fast = obj.b.sim.t_veridical_fast; t_veridical_fast = t_veridical_fast(1:T);
             t_veridical_optimal = obj.b.sim.t_veridical_optimal; t_veridical_optimal = t_veridical_optimal(1:T);
             t_veridical_slow = obj.b.sim.t_veridical_slow; t_veridical_slow = t_veridical_slow(1:T);
-            
-            [f1,ax1] = makeStandardFigure(2,[1,2]);
+
+            % filter params for simulating perceptual lag of cue and calcium indicator dynamics
+            Fs = 100;
+            [b,a] = butter(2, 10 / (Fs/2));
+            smoothdelta = filter(b,a,delta);
+
+            [f1,ax1] = makeStandardFigure(3,[1,3]);
+            set(f1, 'units', 'normalized', 'position', [0.1,0.2,0.6,0.25])
             set(f1, 'name', ['Feedback Models at different subjective pacemaker rates, beta=', num2str(beta(1,2))])
             set(f1, 'userdata', ['simBehaviorValueTrajectory(obj) CLASS_value_landscaping_obj runID=', num2str(obj.params.runID)])
             title(ax1(1), 'Estimated Value')
             title(ax1(2), 'RPE')
+            title(ax1(3), 'Smoothed RPE')
             
             plot(ax1(1),t_subjective,V,'g-','linewidth', 4, 'displayname', 'True Value')
             plot(ax1(1),t_veridical_fast,Vh,'b-','linewidth', 3, 'displayname', 'Vh, fast pacemaker')
@@ -608,9 +731,13 @@ classdef CLASS_value_landscaping_obj < handle
             plot(ax1(1),t_veridical_slow,Vh,'r-','linewidth', 3, 'displayname', 'Vh, slow pacemaker')
             
             
-            plot(ax1(2),t_veridical_fast(1:end-1),delta(1:end-1),'b-','linewidth', 3, 'displayname', 'Vh, fast pacemaker')
-            plot(ax1(2),t_veridical_optimal(1:end-1),delta(1:end-1),'k-','linewidth', 3, 'displayname', 'Vh, optimal timer')
-            plot(ax1(2),t_veridical_slow(1:end-1),delta(1:end-1),'r-','linewidth', 3, 'displayname', 'Vh, slow pacemaker')
+            plot(ax1(2),t_veridical_fast(1:end-2),delta(1:end-2),'b-','linewidth', 3, 'displayname', 'Vh, fast pacemaker') % truncated to avoid edge artifact
+            plot(ax1(2),t_veridical_optimal(1:end-2),delta(1:end-2),'k-','linewidth', 3, 'displayname', 'Vh, optimal timer')
+            plot(ax1(2),t_veridical_slow(1:end-2),delta(1:end-2),'r-','linewidth', 3, 'displayname', 'Vh, slow pacemaker')
+
+            plot(ax1(3),t_veridical_fast(1:end-2),smoothdelta(1:end-2),'b-','linewidth', 3, 'displayname', 'Vh, fast pacemaker') % truncated to avoid edge artifact
+            plot(ax1(3),t_veridical_optimal(1:end-2),smoothdelta(1:end-2),'k-','linewidth', 3, 'displayname', 'Vh, optimal timer')
+            plot(ax1(3),t_veridical_slow(1:end-2),smoothdelta(1:end-2),'r-','linewidth', 3, 'displayname', 'Vh, slow pacemaker')
             
             ylabel(ax1(1),'Value')
             ylim(ax1(1),[0 1])
@@ -618,6 +745,10 @@ classdef CLASS_value_landscaping_obj < handle
             
             ylabel(ax1(2),'RPE')
             xlim(ax1(2),[min(t_veridical_slow) max(t_veridical_slow)])
+
+            ylabel(ax1(3),'smoothed RPE')
+            xlim(ax1(3),[min(t_veridical_slow) max(t_veridical_slow)])
+
             
             legend('show','location', 'best', 'box','off')
         end
