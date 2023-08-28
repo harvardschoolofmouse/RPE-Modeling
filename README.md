@@ -3,8 +3,9 @@ Original code for models in "Internal timing-related dopaminergic dynamics are e
 
 > Credits
 >
->   Self-timed movement models:  Allison E. Hamilos (@harvardschoolofmouse)
->   Temporal Difference learning under state uncertainty with feedback:  Learning simulations developed from original code by John Mikhael
+>   Self-timed movement models and original simulations:  Allison E. Hamilos (@harvardschoolofmouse)
+>
+>   Temporal Difference learning under state uncertainty with feedback:  Value function learning code adapted from original code by John Mikhael
 > 
 
 ## Dependencies
