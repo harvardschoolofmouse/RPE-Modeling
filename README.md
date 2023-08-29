@@ -1,9 +1,9 @@
 # RPE-Modeling | v0.0.2
-Original code for models in "Internal timing-related dopaminergic dynamics are explained by reward-prediction errors" by Allison E Hamilos and John A Assad, biorxiv, 2023
+Code for models in "Internal timing-related dopaminergic dynamics are explained by reward-prediction errors" by Allison E Hamilos and John A Assad, biorxiv, 2023
 
 > Credits
 > 
->   Temporal Difference learning under state uncertainty with feedback:  Value function learning code was adapted from original code by John Mikhael (@jgmikhael). Dr. Mikhael's original code is included in the JMoriginalcode folder for comparison (<a href="https://github.com/jgmikhael/ramping">his latest GitHub version here</a>). Original derivation of this method is reported in <a href="https://www.cell.com/current-biology/pdf/S0960-9822(22)00036-7.pdf">Mikhael et al., 2022, Current Biology 32, 1077–1087</a>
+>   Temporal Difference learning under state uncertainty with feedback:  The value function learning code was adapted from original code by John Mikhael (@jgmikhael). Dr. Mikhael's original code can be found on his <a href="https://github.com/jgmikhael/ramping">GitHub page</a>. Original derivation of this method is reported in <a href="https://www.cell.com/current-biology/pdf/S0960-9822(22)00036-7.pdf">Mikhael et al., 2022, Current Biology 32, 1077–1087</a>
 >
 >   Application of this method in models of the self-timed movement and perceptual timing tasks:  Allison E. Hamilos (@harvardschoolofmouse)
 > 
