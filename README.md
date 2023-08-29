@@ -14,7 +14,7 @@ Runs on MATLAB 2023a+
 
 ## Getting started:
 
-Running obj = CLASS_value_landscaping_obj will produce Figures 2 and 3 from the biorxiv manuscript. That's all you need to do! The uncertainty kernels will also display. 
+Running obj = CLASS_value_landscaping_obj will produce Figures 2 and 3 from the biorxiv manuscript. That's all you need to do! The uncertainty kernels adapted from Mikhael et al., 2022 will also display. 
 
 ### Simulated internal timing states and value/RPE landscapes
 <img width="30%" alt="image" src="https://github.com/harvardschoolofmouse/RPE-Modeling/assets/50119751/5477780d-c597-4191-aa1a-65142770361b"> 
