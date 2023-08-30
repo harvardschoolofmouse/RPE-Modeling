@@ -31,7 +31,6 @@ classdef CLASS_value_landscaping_obj < handle
             LOI_time_ms = 400;                      % lamp-off interval
             timing_interval_ms = T_time*1000;       % timing interval from cue to lick (not inclusive of 0)
             post_lick_interval_ms = 1100;%300;            % time to look post-lick
-            warning('change here')
             total_post_cue_time = timing_interval_ms+post_lick_interval_ms;     % total states past the cue (non inclusive of 0)
             total_time = LOI_time_ms+timing_interval_ms+post_lick_interval_ms;  % total time (not inclusive of 0)
             state_width_ms = 80;                    % each subjective timing state assumed to include this many ms of veridical time
@@ -92,12 +91,12 @@ classdef CLASS_value_landscaping_obj < handle
             end
             % true value landscape         
             obj.b.params.t = 1:obj.b.params.n;      % time (ie subjective timing state), originally t by JM
-            warning('changed this. mouse doesnt know outcome till after lick')
+            % warning('changed this. mouse doesnt know outcome till after lick')
             obj.b.params.r = zeros(obj.b.params.n,1); obj.b.params.r(obj.b.params.T+1:obj.b.params.T+10)=1;%+1) = 1;   % reward schedule (i.e., position of lick)
             obj.b.params.oT = [1:obj.b.params.CS, obj.b.params.T+1:obj.b.params.n];   % state positions outside the trial (cue and before, post-lick)
             obj.b.params.V = obj.params.gamma.^(obj.b.params.T-obj.b.params.t)'; 
 %             obj.b.params.V(obj.b.params.oT) = 0;           % assetion: true value landscape via exponential TD model
-            warning('changed this. trying to fix discontinuity')
+            % warning('changed this from JM model to fix discontinuity')
             obj.b.params.V(1:obj.b.params.CS) = 0; % assertion -- value after the lick is not defined, so continues to increase
             if Plot
                 [f1,ax1] = makeStandardFigure(1,[1,1]);
@@ -243,7 +242,7 @@ classdef CLASS_value_landscaping_obj < handle
 %             warning('I think we need to define L with the web somehow...the L depends on web...')
 %             obj.b.params.xl = obj.b.params.xl.*obj.b.params.xw; % we will multiplex the weber frax with the large kernel
 %             obj.b.params.xs = obj.b.params.xs;
-            warning('changed this so we keep kernels going forward forever from the cue')
+            % warning('changed this so we keep kernels going forward forever from the cue')
 %             obj.b.params.xs(:,obj.b.params.oT)=0; 
 %             obj.b.params.xl(:,obj.b.params.oT)=0; 
 %             obj.b.params.xw(:,obj.b.params.oT)=0;     % leave out times outside trial
@@ -345,7 +344,7 @@ classdef CLASS_value_landscaping_obj < handle
                 title(ax1(1),['$\hat{V_t}$, beta=', num2str(beta(1,1))], 'interpreter', 'latex')
                 set(f1, 'name', 'State uncertainty without feedback, beta=0')
                 %beta=0, no feedback
-                warning('changed this search: ********************')
+                % warning('changed this search: ********************')
                 for iter = 1:numIter % for each iteration of learning...
                     for y = 1:T+10%T+1 ********************
                         Vh(y,1) = w(:,1)'*xs(:,y); % Vh=Vt, w=Vtau, xs=p(t|tau, sigma=s) -- assuming we got feedback
@@ -371,7 +370,7 @@ classdef CLASS_value_landscaping_obj < handle
             elseif strcmp(Mode, 'weber') || Mode==3
                 set(f1, 'name', 'Weber uncertainty without feedback')
                 title(ax1(1),'$\hat{V_t}$, no feedback (weber uncertainty)', 'interpreter', 'latex')
-                warning('changed this search: ********************')
+                % warning('changed this search: ********************')
                 for iter = 1:numIter
                     for y = 1:T+10%T+1 ********************
                         Vh(y,3) = w(:,3)'*xw(:,y);
@@ -398,7 +397,7 @@ classdef CLASS_value_landscaping_obj < handle
                 % beta=beta, with feedback
                 title(ax1(1),['$\hat{V_t}$, beta=', num2str(beta(1,2))], 'interpreter', 'latex')
                 set(f1, 'name', ['State uncertainty with feedback, beta=', num2str(beta(1,2))])
-                warning('changed this search: ********************')
+                % warning('changed this search: ********************')
                 for iter = 1:numIter % for each iteration of learning...
                     for y = 1:T+10%T+1 ********************
                         Vh(y,2) = w(:,2)'*xs(:,y);
@@ -907,7 +906,7 @@ classdef CLASS_value_landscaping_obj < handle
             
             
             
-            warning('Debug:reward delivered/omitted at second tone')
+            warning('reward delivered/omitted at second tone')
             Ts = [find(t_subjective>=0.6,1,'first'), find(t_subjective>=1.05,1,'first'), find(t_subjective>=1.26,1,'first'), find(t_subjective>=1.74,1,'first'), find(t_subjective>=1.95,1,'first'), find(t_subjective>=2.4,1,'first')];
             n_trials = zeros(6,1);
             n_complete = zeros(6,1);
@@ -915,7 +914,7 @@ classdef CLASS_value_landscaping_obj < handle
             
             pbail = 1/(2*n);
 %             pbail = 0;
-            warning('Debug: flipping only a few')
+            % warning('Debug: flipping only a few')
 %             ntrials = 5000;
             [w,... V_tau, the estimated value at subjective time tau
                 Vh,... the estimate of the value function at veridical time t
@@ -933,7 +932,7 @@ classdef CLASS_value_landscaping_obj < handle
                 % assign reward based on how likely to guess correctly at
                 % each for now
                 r = zeros(n,1); 
-                warning('messed with this to make reward up longer than just once')
+                % warning('messed with this to make reward up longer than just once')
                 forwardTime = 50;
                 if ix==1, if obj.flip(0.98),r(T:T+forwardTime) = 1; else,r(T) = 0;end
                 elseif ix==2, if obj.flip(0.94), r(T:T+forwardTime) = 1; else, r(T) = 0;end
