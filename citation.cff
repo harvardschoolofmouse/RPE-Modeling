@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Hamilos"
+  given-names: "Allison Elizabeth"
+  orcid: "https://orcid.org/0000-0001-9486-0017"
+title: "RPE-Modeling - Code for behavioral timing models from Hamilos & Assad, BioRxiv, 2023."
+version: 1.0.0
+date-released: 2023-08-27
+url: "https://github.com/harvardschoolofmouse/RPE-Modeling"
